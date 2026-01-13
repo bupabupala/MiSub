@@ -1,11 +1,16 @@
 FROM node:20-bookworm AS build
 WORKDIR /app
 
+# 确保在构建阶段不跳过 devDependencies
+ENV NODE_ENV=development
+
 COPY package.json package-lock.json ./
 RUN apt-get update \
     && apt-get install -y --no-install-recommends python3 make g++ \
     && rm -rf /var/lib/apt/lists/*
-RUN npm ci
+
+# 安装所有依赖（包括 devDependencies）
+RUN npm install --production=false
 
 COPY . .
 RUN npm run build
